@@ -220,6 +220,225 @@
 
 
         })
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////*Filtro*////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////
+        let btnFiltro = document.getElementById('btn_filtro')
+        let paginationFiltro = document.getElementById('pagination_filtro')
+        let tablaFiltro = document.getElementById('tabla_filtro')
+
+        //funcion que crea las tablas del filtro
+        function crearTabla(data) {
+            let personajes_aux = ''
+            data['results'].forEach(element => {
+                let url_aux = "{{ Route('mostrar_detalle', ['id' => 'temp']) }}";
+                url_aux = url_aux.replace('temp', element['id']);
+                personajes_aux = `${personajes_aux}
+                        <tr>
+                            <td>${element['id']}</td>
+                            <td>${element['name']}</td>
+                            <td>${element['status']}</td>
+                            <td>${element['species']}</td>
+                            <td>
+                                <a class="btn btn-success" href="${url_aux}">Mostrar Detalle</a>   
+                            </td>
+                        </tr>`
+
+            });
+
+            let tabla = `<table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Especie</th>
+                        <th scope="col">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    ${personajes_aux}
+
+                </tbody>
+            </table>`
+
+            tablaFiltro.innerHTML = tabla
+        }
+        //funcion que crea la paginacion del filtro
+        function crearPaginacion(url, paginas) {
+            codigoPaginationFiltro = `<div class="container_pre_filtro" id="container_pre_filtro">
+                                                            <div id="previous_filtro">
+                                                                <button class="btn btn-secondary" id="btn_pre_filtro" disabled>Anterior</button>
+                                                            </div>
+                                                        </div>
+                                                        <div id="numPagina_filtro">
+                                                            <input type="text" name="" id="url_filtro" value="${url}" hidden>
+                                                            <input type="text" name="" id="paginas_filtro" value="${paginas}" hidden>
+                                                            <input type="number" name="" id="pagina_filtro" value="${1}" disabled>
+                                                        </div>
+                                                        <div class="container_next_filtro" id="container_next_filtro">
+                                                            <div id="next_filtro">
+                                                                <button class="btn btn-secondary" id="btn_next_filtro">Siguiente</button>
+                                                            </div>
+                                                        </div>`
+
+            paginationFiltro.innerHTML = codigoPaginationFiltro
+        }
+
+
+        //////////////////////paginacion filtro/////////////////////////////////
+        paginationFiltro.addEventListener('click', (e) => {
+            e.preventDefault();
+            let especie = document.getElementById('select_especies').value
+            let estado = document.getElementById('select_estados').value
+            let urlFiltro = document.getElementById('url_filtro').value
+            let paginas_filtro = document.getElementById('paginas_filtro').value // total de paginas de la busqueda
+            let pagina_filtro = Number(document.getElementById('pagina_filtro').value)
+
+
+            //verificamos que boton se oprime
+            if (e.target.matches("button#btn_pre_filtro.btn.btn-secondary")) {
+                pagina_filtro = pagina_filtro - 1
+            }
+            if (e.target.matches("button#btn_next_filtro.btn.btn-secondary")) {
+                pagina_filtro = pagina_filtro + 1
+            }
+
+            let url1 = ''
+            let url2 = ''
+            let nuevaUrl = ''
+            //segun el filtro que se utilice ingresara en la condicion y se creara la url para la busqueda de los datos en la API
+            if (especie == 0) {
+                //se crea la nueva url de busqueda
+                nuevaURL =
+                    `https://rickandmortyapi.com/api/character/?page=${pagina_filtro}&status=${estado}`
+                console.log(nuevaURL)
+                fetch(nuevaURL)
+                    .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+                    .then((json) => {
+                        console.log(json)
+                        crearTabla(json)
+                    })
+                    .catch()
+
+            } else if (estado == 0) {
+                //se crea la nueva url de busqueda
+                nuevaURL =
+                    `https://rickandmortyapi.com/api/character/?page=${pagina_filtro}&species=${especie}`
+                console.log(nuevaURL)
+                fetch(nuevaURL)
+                    .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+                    .then((json) => {
+                        console.log(json)
+                        crearTabla(json)
+                    })
+                    .catch()
+
+            } else {
+                //se crea la nueva url de busqueda
+                nuevaURL =
+                    `https://rickandmortyapi.com/api/character/?page=${pagina_filtro}&species=${especie}&status=${estado}`
+                console.log(nuevaURL)
+                fetch(nuevaURL)
+                    .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+                    .then((json) => {
+                        console.log(json)
+                        crearTabla(json)
+                    })
+                    .catch()
+
+
+            }
+
+            //se agregan los nuevos datos en la paginación
+            document.getElementById('numPagina_filtro').innerHTML =
+                `<input type="text" name="" id="url_filtro" value="${urlFiltro}" hidden>
+                        <input type="text" name="" id="paginas_filtro" value="${paginas_filtro}" hidden>
+                        <input type="text" name="" id="especie_filtro" value="${especie}" hidden>
+                        <input type="text" name="" id="estado_filtro" value="${estado}" hidden>
+                        <input type="number" name="" id="pagina_filtro" value="${pagina_filtro}" disabled>`
+
+            //desabilita el boton "Anterior" si la pagina es 1         
+            if (pagina_filtro > 1) {
+                document.getElementById('btn_pre_filtro').disabled = false
+            } else {
+                document.getElementById('btn_pre_filtro').disabled = true
+            }
+            //desabilita el boton "Siguiente" si llega a la pagina_filtro tiene el mismo valor de paginas_filtro(cantidad total de paginas de la busqueda)
+            if (pagina_filtro == paginas_filtro) {
+                document.getElementById('btn_next_filtro').disabled = true
+            } else {
+                document.getElementById('btn_next_filtro').disabled = false
+            }
+
+
+
+        })
+
+
+        //////////////////////Boton busqueda del filtro/////////////////////////////////
+        btnFiltro.addEventListener("click", (e) => {
+
+            e.preventDefault();
+            let especie = document.getElementById('select_especies').value
+            let estado = document.getElementById('select_estados').value
+
+
+            // https://rickandmortyapi.com/api/character/?name=rick&status=alive
+            if (especie == 0 && estado == 0) {
+                alert('Debe seleccionar un especie o algún estado');
+            } else if (especie == 0) {
+                let urlEstado = `${url}/?status=${estado}`
+                fetch(urlEstado)
+                    .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+                    .then((json) => {
+                        let cantidadPages = json['info']['pages'];
+                        let url_next = json['info']['next']
+                        //si el resultado tiene más de una pagina se crea la paginacion
+                        paginationFiltro.innerHTML = ''
+                        if (cantidadPages > 1) {
+                            crearPaginacion(url_next, cantidadPages)
+                        }
+                        crearTabla(json)
+                    }).catch()
+
+            } else if (estado == 0) {
+                let urlEspecie = `${url}/?species=${especie}`
+                fetch(urlEspecie)
+                    .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+                    .then((json) => {
+
+                        let cantidadPages = json['info']['pages'];
+                        let url_next = json['info']['next']
+                        paginationFiltro.innerHTML = ''
+                        //si el resultado tiene más de una pagina se crea la paginacion
+                        if (cantidadPages > 1) {
+                            crearPaginacion(url_next, cantidadPages)
+                        }
+                        crearTabla(json)
+                    }).catch()
+            } else {
+
+                let urlEspecieEstado = `${url}/?species=${especie}&status=${estado}`
+                console.log(especie, estado)
+                fetch(urlEspecieEstado)
+                    .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+                    .then((json) => {
+
+                        let cantidadPages = json['info']['pages'];
+                        let url_next = json['info']['next']
+                        paginationFiltro.innerHTML = ''
+                        //si el resultado tiene más de una pagina se crea la paginacion
+                        if (cantidadPages > 1) {
+                            crearPaginacion(url_next, cantidadPages)
+                        }
+                        crearTabla(json)
+                    }).catch()
+            }
+        })
     </script>
 </body>
 
