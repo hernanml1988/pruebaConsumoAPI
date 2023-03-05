@@ -46,7 +46,14 @@ class InicioController extends Controller
 
 
     
- 
+    public function mostrarDetalle($id){
+
+
+        $url = env('URL_API', 'https://rickandmortyapi.com/api/character');
+        $res = Http::get($url.'/'.$id);
+        $personaje = $res->json();     
+        return view('mostrar_detalle', ['personaje' => $personaje]);
+    }
 
 
 }
