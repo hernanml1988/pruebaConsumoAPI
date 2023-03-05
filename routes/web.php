@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InicioController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
+Route::get('/', [InicioController::class, 'index']);
+Route::get('/mostrar_detale/{id}', [InicioController::class, 'mostrarDetalle'])->name('mostrar_detalle');
+
+
+
+?>
